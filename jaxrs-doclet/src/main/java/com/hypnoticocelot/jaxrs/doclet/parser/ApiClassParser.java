@@ -20,12 +20,14 @@ public class ApiClassParser {
     private final ClassDoc classDoc;
     private final String rootPath;
     private final Set<Model> models;
+    private final Map<String, String> modelClasses;
 
     public ApiClassParser(DocletOptions options, ClassDoc classDoc) {
         this.options = options;
         this.classDoc = classDoc;
         this.rootPath = parsePath(classDoc.annotations());
         this.models = new LinkedHashSet<Model>();
+        this.modelClasses = new HashMap<String, String>();
     }
 
     public String getRootPath() {
@@ -42,6 +44,7 @@ public class ApiClassParser {
                 continue;
             }
             models.addAll(methodParser.models());
+            modelClasses.putAll(methodParser.getModelClasses());
 
             String realPath = parsedMethod.getPath();
             Collection<Method> matchingMethods = apiMethods.get(realPath);
@@ -77,4 +80,7 @@ public class ApiClassParser {
         return models;
     }
 
+    public Map<String, String> getModelClasses() {
+        return modelClasses;
+    }
 }

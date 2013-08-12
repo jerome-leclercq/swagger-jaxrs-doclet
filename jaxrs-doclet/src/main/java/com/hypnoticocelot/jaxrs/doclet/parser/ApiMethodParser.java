@@ -24,6 +24,7 @@ public class ApiMethodParser {
     private final String parentPath;
     private final MethodDoc methodDoc;
     private final Set<Model> models;
+    private final Map<String, String> modelClasses;
 
     public ApiMethodParser(DocletOptions options, String parentPath, MethodDoc methodDoc) {
         this.options = options;
@@ -31,6 +32,7 @@ public class ApiMethodParser {
         this.parentPath = parentPath;
         this.methodDoc = methodDoc;
         this.models = new LinkedHashSet<Model>();
+        this.modelClasses = new HashMap<String, String>();
     }
 
     public Method parse() {
@@ -47,14 +49,18 @@ public class ApiMethodParser {
             if (!shouldIncludeParameter(httpMethod, parameter)) {
                 continue;
             }
+            String typeName = translator.typeName(parameter.type()).value();
             if (options.isParseModels()) {
                 models.addAll(new ApiModelParser(translator, parameter.type()).parse());
+            } else if(AnnotationHelper.isPrimitive(parameter.type()) == false) {
+                modelClasses.put(typeName, parameter.type().qualifiedTypeName());
             }
+            
             parameters.add(new ApiParameter(
                     AnnotationHelper.paramTypeOf(parameter),
                     AnnotationHelper.paramNameOf(parameter),
                     commentForParameter(methodDoc, parameter),
-                    translator.typeName(parameter.type()).value()
+                    typeName
             ));
         }
 
@@ -76,6 +82,8 @@ public class ApiMethodParser {
         String returnType = translator.typeName(type).value();
         if (options.isParseModels()) {
             models.addAll(new ApiModelParser(translator, type).parse());
+        } else if(AnnotationHelper.isPrimitive(type) == false) {
+            modelClasses.put(returnType, type.qualifiedTypeName());
         }
 
         // First Sentence of Javadoc method description
@@ -100,6 +108,10 @@ public class ApiMethodParser {
 
     public Set<Model> models() {
         return models;
+    }
+    
+    public Map<String, String> getModelClasses() {
+        return modelClasses;
     }
 
     private boolean shouldIncludeParameter(HttpMethod httpMethod, Parameter parameter) {
