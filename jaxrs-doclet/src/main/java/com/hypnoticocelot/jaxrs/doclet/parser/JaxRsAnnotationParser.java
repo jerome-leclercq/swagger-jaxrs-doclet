@@ -70,6 +70,7 @@ public class JaxRsAnnotationParser {
         File docFile = new File(outputDirectory, "service.json");
         recorder.record(docFile, listing);
 
+        /*
         // Copy swagger-ui into the output directory.
         final ZipInputStream swaggerZip = new ZipInputStream(ServiceDoclet.class.getResourceAsStream("/swagger-ui.zip"));
         ZipEntry entry = swaggerZip.getNextEntry();
@@ -86,6 +87,7 @@ public class JaxRsAnnotationParser {
             entry = swaggerZip.getNextEntry();
         }
         swaggerZip.close();
+        */
     }
 
 }
